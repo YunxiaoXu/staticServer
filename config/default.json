@@ -1,0 +1,5 @@
+{
+	"port": 8080,
+	"root": "/data/data/com.termux/files/home/Laurie",
+	"indexPage": "index.html"
+}
