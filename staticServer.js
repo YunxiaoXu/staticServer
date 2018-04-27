@@ -3,15 +3,10 @@ const path = require("path");
 const config = require("./config/default.json");
 const fs = require('fs');
 const mime = require('./mime');
-const url = require('url')
+const url = require('url');
+const zlib = require('zlib');
 
-const hasTrailingSlash = (str) => {
-	if (str[str.length-1]=='/') {
-		return true;
-	} else {
-		return false;
-	}
-}
+const hasTrailingSlash = url => url[url.length - 1] === '/';
 
 class StaticServer {
 
@@ -21,8 +16,13 @@ class StaticServer {
 		this.indexPage = config.indexPage;
 		this.enableCacheControl = config.cacheContron;
 		this.enableExpires = config.expires;
-		this.enableEtag = config.etag;
+		this.enableETag = config.etag;
 		this.enableLastModified = config.lastModified;
+	}
+
+	respondError(err, rea) {
+		res.writeHead(500);
+		return res.end(err);
 	}
 
 	respondNotFound(req, res) {
@@ -30,16 +30,63 @@ class StaticServer {
 		res.end(`<h1>Page Not Found</h1><p>The requested URL ${req.url} was not found on this server.</p>`);
 	}
 
-	respondFile(pathName, req, res) {
-		const readStream = fs.createReadStream(pathName);
+	generateETag(stat) {
+		const mtime = stat.mtime.getTime().toString(16);
+		const size = stat.size.toString(16);
+		return `W/"${size} - ${mtime}"`;
+	}
+
+	setFreshHeaders(stat, res) {
+		const lastModified = stat.mtime.toUTCString();
+		if (this.enableExpires) {
+			const expireTime = (new Date(Date.now() + this.maxAge * 1000)).toUTCString();
+			res.setHeader('Expires',expireTime);
+		}
+		if (this.enableLastModified) {
+			res.setHeader('Last-Modified',lastModified);
+		}
+		if (this.enableETag) {
+			res.setHeader('ETag',this.generateETag(stat));
+		}
+	}
+
+	isFresh(reqHeaders, resHeaders) {
+		const noneMatch = reqHeaders['if-none-match'];
+		const lastModified = reqHeaders['if-modified-since'];
+		if (!(noneMatch || lastModified)) return false;
+		if (noneMatch && (noneMatch !== resHeaders['etag'])) return false;
+		if (lastModified && (lastModified !== resHeaders['last-modified'])) return false;
+		return true;
+	}
+
+	respond(pathName, req, res) {
+		fs.stat(pathName, (err, stat) => {
+			if (err) return respondError(err, res);
+			this.setFreshHeaders(stat,res);
+			if (this.isFresh(req.headers, res._headers)) {
+				this.responseNotModified(res);
+			} else {
+				this.respondFile(stat, pathName, req, res);
+			}
+		});
+	}
+
+	responseNotModified(res) {
+		res.statusCode = 304;
+		res.end();
+	}
+
+	respondFile(stat, pathName, req, res) {
+		let readStream;
 		res.setHeader('Content-Type',mime.lookup(pathName));
+		readStream = fs.createReadStream(pathName);
 		readStream.pipe(res);
 	}
 
 	respondDirectory (pathName, req, res) {
 		const indexPagePath = path.join(pathName, this.indexPage);
 		if (fs.existsSync(indexPagePath)) {
-			this.respondFile(indexPagePath, req, res);
+			this.respond(indexPagePath, req, res);
 		} else {
 			fs.readdir(pathName, (err, files) => {
 				if (err) {
@@ -74,6 +121,7 @@ class StaticServer {
 
 
 	routeHandler(pathName, req, res) {
+		console.info(req.url);
 		fs.stat(pathName, (err, stat) => {
 			if (!err) {
 				const requestedPath = url.parse(req.url).pathname;
@@ -82,7 +130,7 @@ class StaticServer {
 				} else if (stat.isDirectory()) {
 					this.respondRedirect(req, res);
 				} else {
-					this.respondFile(pathName,req,res);
+					this.respond(pathName,req,res);
 				}
 			} else {
 				console.info(`.${req.url}`);

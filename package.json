@@ -1,0 +1,24 @@
+{
+  "name": "staticwebserver",
+  "version": "1.0.0",
+  "description": "support file-system website",
+  "main": "app.js",
+  "scripts": {
+    "test": "node app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/YunxiaoXu/staticServer.git"
+  },
+  "keywords": [
+    "server",
+    "node",
+    "js"
+  ],
+  "author": "YunxiaoXu",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/YunxiaoXu/staticServer/issues"
+  },
+  "homepage": "https://github.com/YunxiaoXu/staticServer#readme"
+}
