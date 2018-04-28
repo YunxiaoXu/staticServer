@@ -133,7 +133,7 @@ class StaticServer {
 					this.respond(pathName,req,res);
 				}
 			} else {
-				console.info(`.${req.url}`);
+				console.info(`! error: .${req.url}`);
 				this.respondNotFound(req, res);
 			}
 		});
