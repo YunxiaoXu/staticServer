@@ -146,7 +146,7 @@ class StaticServer {
 			//res.writeHead(200);
 			//res.end(`Requeste path: ${pathName}`);
 			this.routeHandler(pathName, req, res);
-		}).listen(this.port, err => {
+		}).listen(this.port, '0.0.0.0',err => {
 			if (err) {
 				console.error(err);
 				console.info('Failed to start server.');
