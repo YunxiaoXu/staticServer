@@ -18,6 +18,7 @@ class StaticServer {
 		this.enableExpires = config.expires;
 		this.enableETag = config.etag;
 		this.enableLastModified = config.lastModified;
+		this.maxAge = config.maxAge;
 	}
 
 	respondError(err, rea) {
@@ -27,7 +28,7 @@ class StaticServer {
 
 	respondNotFound(req, res) {
 		res.writeHead(404, {'Content-Type':'text/html'});
-		res.end(`<h1>Page Not Found</h1><p>The requested URL ${req.url} was not found on this server.</p>`);
+		res.end(`<h1>Page Not Found</h1><p>The requested URL ${req.url} was not found on this server.</p><br/><p><a href='/'>back</a></p>`);
 	}
 
 	generateETag(stat) {
