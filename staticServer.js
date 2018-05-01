@@ -9,10 +9,12 @@ const zlib = require('zlib');
 const hasTrailingSlash = url => url[url.length - 1] === '/';
 
 function getClientIp(req) {
-      return req.headers['x-forwarded-for'] ||
-      req.connection.remoteAddress ||
-      req.socket.remoteAddress ||
-      req.connection.socket.remoteAddress;
+	return req.headers['x-forwarded-for'] ||
+	req.headers['x-real-ip'] ||
+	req.connection.remoteAddress ||
+	req.socket.remoteAddress ||
+	req.connection.socket.remoteAddress ||
+	req.clientip;
 };
 
 class StaticServer {

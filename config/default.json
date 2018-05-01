@@ -1,10 +1,11 @@
 {
 	"port": 8080,
-	"root": "/data/data/com.termux/files/home/Laurie",
+	"root": "D:/website/",
 	"indexPage": "index.html",
 	"cacheControl": true,
 	"expires": true,
 	"etag": true,
 	"lastModified": true,
-	"maxAge": 60
+	"maxAge": 60,
+	"zipMatch": "^\\.(css|html|js|jpeg|jpg|png)$"
 }
