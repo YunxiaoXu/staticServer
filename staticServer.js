@@ -104,7 +104,7 @@ class StaticServer {
 					return res.end(err);
 				}
 				const requestPath = url.parse(req.url).pathname;
-				let content = `<h1>Index of ${requestPath}</h1>`;
+				let content = `<h1>Index of ${requestPath}</h1><ul>`;
 				files.forEach(file => {
 					let itemLink = path.join(requestPath,file);
 					const stat = fs.statSync(path.join(pathName,file));
@@ -112,8 +112,9 @@ class StaticServer {
 						itemLink = path.join(itemLink, '/');
 						file = path.join(file,'/');
 					}
-					content += `<p><a href='${itemLink}'>${file}</a></p>`;
+					content += `<li><a href='${itemLink}'>${file}</a></li>`;
 				});
+				content += '</ul>'
 				res.writeHead(200,{'Content-Type':'text/html'});
 				res.end(content);
 			});
