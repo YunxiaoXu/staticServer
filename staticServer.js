@@ -11,10 +11,10 @@ const hasTrailingSlash = url => url[url.length - 1] === '/';
 function getClientIp(req) {
 	return req.headers['x-forwarded-for'] ||
 	req.headers['x-real-ip'] ||
+	req.headers['clientip'] ||
 	req.connection.remoteAddress ||
 	req.socket.remoteAddress ||
-	req.connection.socket.remoteAddress ||
-	req.clientip;
+	req.connection.socket.remoteAddress
 };
 
 class StaticServer {
@@ -132,6 +132,13 @@ class StaticServer {
 
 
 	routeHandler(pathName, req, res) {
+		/*var h = req.headers;
+		console.info(h['x-forwarded-for']);
+		console.info(h['x-real-ip']);
+		console.info(h['clientip']);
+		console.info(req.connection.remoteAddress);
+		console.info(req.socket.remoteAddress);
+		console.info(req.headers);*/
 		console.info(new Date().toLocaleString() + ' -- ' + getClientIp(req) + ' -- ' + req.url);
 		fs.stat(pathName, (err, stat) => {
 			if (!err) {
