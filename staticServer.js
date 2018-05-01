@@ -8,6 +8,13 @@ const zlib = require('zlib');
 
 const hasTrailingSlash = url => url[url.length - 1] === '/';
 
+function getClientIp(req) {
+      return req.headers['x-forwarded-for'] ||
+      req.connection.remoteAddress ||
+      req.socket.remoteAddress ||
+      req.connection.socket.remoteAddress;
+};
+
 class StaticServer {
 
 	constructor () {
@@ -122,7 +129,7 @@ class StaticServer {
 
 
 	routeHandler(pathName, req, res) {
-		console.info(req.url);
+		console.info(new Date().toLocaleString() + ' -- ' + getClientIp(req) + ' -- ' + req.url);
 		fs.stat(pathName, (err, stat) => {
 			if (!err) {
 				const requestedPath = url.parse(req.url).pathname;
